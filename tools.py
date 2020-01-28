@@ -183,3 +183,67 @@ def weighed_mean(data, errors):
 	error_extended = np.sqrt(np.sum((data - mean)**2 / errors**2) / ((len(data) - 1) * np.sum(1 / errors**2)))
 
 	return mean, error, error_extended
+
+
+def scientific_round(data, error):
+    data_res = []
+    error_res = []
+
+    try:
+        # use scientific_round for every (data, error) pair in the arrays
+        for i in range(len(data)):
+            d, e = scientific_round(data[i], error[i])
+            data_res.append(d)
+            error_res.append(e)
+    except TypeError:
+        exp = 0
+        up = 1
+
+        if error < 1:
+            # scale up until first significant figure is found
+            while math.trunc(error * 10**exp) == 0:
+                exp = exp + 1
+
+            # check if two significant figures should be used
+            if math.trunc(error * 10**exp) <= 2:
+                exp = exp + 1
+
+            # check if the error needs to be rounded up
+            if math.trunc(error * 10**exp) == error * 10**exp:
+                up = 0
+
+        else:
+            # scale down until first significant figure is found
+            while not math.trunc(error * 10**exp) < 10:
+                exp = exp - 1
+
+            # check if two significant figures should be used
+            if math.trunc(error * 10**exp) <= 2:
+                exp = exp + 1
+
+            # check if the error needs to be rounded up
+            if math.trunc(error * 10**exp) == error * 10**exp:
+                up = 0
+
+        # calculate resulting error
+        error_res = (math.trunc(error * 10**exp) + up) / 10**exp
+
+        # if the data would be rounded to 0, round it to the first significant figure instead
+        if data >= error:
+            # calculate resulting data rounded to the same accuracy as the error
+            data_res = round(data * 10**exp) / 10**exp
+        else:
+            exp = 0
+            if data < 1:
+                # scale up until first significant figure is found
+                while math.trunc(data * 10**exp) == 0:
+                    exp = exp + 1
+            else:
+                # scale down until first significant figure is found
+                while not math.trunc(data * 10**exp) < 10:
+                    exp = exp - 1
+
+            # calculate the resulting data rounded to one significant figure
+            data_res = round(data * 10**exp) / 10**exp
+
+    return data_res, error_res
