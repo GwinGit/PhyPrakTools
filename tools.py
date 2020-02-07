@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import csv
 
 
@@ -70,37 +71,38 @@ def linfit(X, Y):
 	Data are input and output as follows:
 
 	my, by, ry, smy, sby = linfit(X,Y)
-	X	=	x data (vector)
-	Y	=	y data (vector)
+	X	 =	x data (vector)
+	Y	 =	y data (vector)
 	my	=	slope
 	by	=	y-intercept
 	ry	=	correlation coefficient
-	smy	=	standard deviation of the slope
-	sby	=	standard deviation of the y-intercept
+	smy   =	standard deviation of the slope
+	sby   =	standard deviation of the y-intercept
 
 	"""
 
 	X, Y = map(np.asanyarray, (X, Y))
 
-	# Determine the size of the vector.
+	# Determine the size of the vector
 	n = len(X)
 
-	# Calculate the sums.
-
+	# Calculate the sums
 	Sx = np.sum(X)
 	Sy = np.sum(Y)
 	Sx2 = np.sum(X ** 2)
 	Sxy = np.sum(X * Y)
 	Sy2 = np.sum(Y ** 2)
 
-	# Calculate re-used expressions.
+	# Calculate re-used expressions
 	num = n * Sxy - Sx * Sy
 	den = n * Sx2 - Sx ** 2
 
-	# Calculate my, by, ry, s2, smy and sby.
+	# Calculate my, by, ry, s2, smy and sby
 	my = num / den
 	by = (Sx2 * Sy - Sx * Sxy) / den
-	ry = num / (np.sqrt(den) * np.sqrt(n * Sy2 - Sy ** 2))
+	# ry = num / (np.sqrt(den) * np.sqrt(n * Sy2 - Sy ** 2))
+	ry = np.sum((X - np.mean(X)) * (Y - np.mean(Y)))\
+		/ np.sqrt(np.sum((X - np.mean(X))**2) * np.sum((Y - np.mean(Y))**2))
 
 	diff = Y - by - my * X
 
@@ -171,7 +173,7 @@ def plt_linfit(x, y, plt, label="linearer Fit"):
 
 	plt.plot(x_fit, y_fit, label=label)
 
-	return m, b, m_err, b_err
+	return m, b, m_err, b_err, r
 
 
 def weighed_mean(data, errors):
@@ -186,64 +188,64 @@ def weighed_mean(data, errors):
 
 
 def scientific_round(data, error):
-    data_res = []
-    error_res = []
+	data_res = []
+	error_res = []
 
-    try:
-        # use scientific_round for every (data, error) pair in the arrays
-        for i in range(len(data)):
-            d, e = scientific_round(data[i], error[i])
-            data_res.append(d)
-            error_res.append(e)
-    except TypeError:
-        exp = 0
-        up = 1
+	try:
+		# use scientific_round for every (data, error) pair in the arrays
+		for i in range(len(data)):
+			d, e = scientific_round(data[i], error[i])
+			data_res.append(d)
+			error_res.append(e)
+	except TypeError:
+		exp = 0
+		up = 1
 
-        if error < 1:
-            # scale up until first significant figure is found
-            while math.trunc(error * 10**exp) == 0:
-                exp = exp + 1
+		if error < 1:
+			# scale up until first significant figure is found
+			while math.trunc(error * 10**exp) == 0:
+				exp = exp + 1
 
-            # check if two significant figures should be used
-            if math.trunc(error * 10**exp) <= 2:
-                exp = exp + 1
+			# check if two significant figures should be used
+			if math.trunc(error * 10**exp) <= 2:
+				exp = exp + 1
 
-            # check if the error needs to be rounded up
-            if math.trunc(error * 10**exp) == error * 10**exp:
-                up = 0
+			# check if the error needs to be rounded up
+			if math.trunc(error * 10**exp) == error * 10**exp:
+				up = 0
 
-        else:
-            # scale down until first significant figure is found
-            while not math.trunc(error * 10**exp) < 10:
-                exp = exp - 1
+		else:
+			# scale down until first significant figure is found
+			while not math.trunc(error * 10**exp) < 10:
+				exp = exp - 1
 
-            # check if two significant figures should be used
-            if math.trunc(error * 10**exp) <= 2:
-                exp = exp + 1
+			# check if two significant figures should be used
+			if math.trunc(error * 10**exp) <= 2:
+				exp = exp + 1
 
-            # check if the error needs to be rounded up
-            if math.trunc(error * 10**exp) == error * 10**exp:
-                up = 0
+			# check if the error needs to be rounded up
+			if math.trunc(error * 10**exp) == error * 10**exp:
+				up = 0
 
-        # calculate resulting error
-        error_res = (math.trunc(error * 10**exp) + up) / 10**exp
+		# calculate resulting error
+		error_res = (math.trunc(error * 10**exp) + up) / 10**exp
 
-        # if the data would be rounded to 0, round it to the first significant figure instead
-        if data >= error:
-            # calculate resulting data rounded to the same accuracy as the error
-            data_res = round(data * 10**exp) / 10**exp
-        else:
-            exp = 0
-            if data < 1:
-                # scale up until first significant figure is found
-                while math.trunc(data * 10**exp) == 0:
-                    exp = exp + 1
-            else:
-                # scale down until first significant figure is found
-                while not math.trunc(data * 10**exp) < 10:
-                    exp = exp - 1
+		# if the data would be rounded to 0, round it to the first significant figure instead
+		if data >= error:
+			# calculate resulting data rounded to the same accuracy as the error
+			data_res = round(data * 10**exp) / 10**exp
+		else:
+			exp = 0
+			if data < 1:
+				# scale up until first significant figure is found
+				while math.trunc(data * 10**exp) == 0:
+					exp = exp + 1
+			else:
+				# scale down until first significant figure is found
+				while not math.trunc(data * 10**exp) < 10:
+					exp = exp - 1
 
-            # calculate the resulting data rounded to one significant figure
-            data_res = round(data * 10**exp) / 10**exp
+			# calculate the resulting data rounded to one significant figure
+			data_res = round(data * 10**exp) / 10**exp
 
-    return data_res, error_res
+	return data_res, error_res
