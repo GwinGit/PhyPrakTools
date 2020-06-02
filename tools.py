@@ -113,7 +113,7 @@ def linfit(X, Y):
 	return my, by, ry, smy, sby
 
 
-def table(content, header=[], position="", label="tab:my_label", caption="Caption"):
+def table(content, header=[], position="", label="tab:my_label", caption="Caption", captionAbove=False):
 	# the content parameter is organized in columns
 	content = col_to_row(content)
 	content = [header] + content
@@ -122,7 +122,10 @@ def table(content, header=[], position="", label="tab:my_label", caption="Captio
 	for _ in content[0][1:]:
 		layout = layout + "c|"
 
-	res = f"\\begin{{table}}[{position}]\n\t\\centering\n\t\\begin{{tabular}}{{{layout}}}\n\t\t\\hline\n\t\t"
+	res = f"\\begin{{table}}[{position}]\n\t\\centering\n"
+	if captionAbove:
+		res = res + f"\t\\caption{{{caption}}}\n"
+	res = res + f"\t\\begin{{tabular}}{{{layout}}}\n\t\t\\hline\n\t\t"
 
 	for obj in content[0]:
 		res = res + str(obj) + " & "
@@ -135,7 +138,10 @@ def table(content, header=[], position="", label="tab:my_label", caption="Captio
 
 		res = res[:-2] + "\\\\ \\hline\n\t\t"
 
-	res = res[:-1] + f"\\end{{tabular}}\n\t\\caption{{{caption}}}\n\t\\label{{{label}}}\n\\end{{table}}"
+	res = res[:-1] + f"\\end{{tabular}}\n"
+	if not captionAbove:
+		res = res + f"\t\\caption{{{caption}}}\n"
+	res = res + f"\t\\label{{{label}}}\n\\end{{table}}"
 
 	return res
 
