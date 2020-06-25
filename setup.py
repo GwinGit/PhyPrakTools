@@ -8,5 +8,5 @@ setup(name='phypraktools',
       author_email='t.n.gwin13@gmail.com',
       license='MIT',
       packages=['phypraktools'],
-	  install_requires=['numpy','matplotlob'],
+	  install_requires=['numpy','matplotlib'],
       zip_safe=False)
